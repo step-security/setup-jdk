@@ -3362,39 +3362,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PRIVATE_KEY_FILE = void 0;
 exports.importKey = importKey;
 exports.deleteKey = deleteKey;
-const fs = __importStar(__nccwpck_require__(896));
-const path = __importStar(__nccwpck_require__(928));
-const io = __importStar(__nccwpck_require__(994));
 const exec = __importStar(__nccwpck_require__(236));
-const util = __importStar(__nccwpck_require__(527));
-exports.PRIVATE_KEY_FILE = path.join(util.getTempDir(), 'private-key.asc');
 const PRIVATE_KEY_FINGERPRINT_REGEX = /\w{40}/;
 function importKey(privateKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        fs.writeFileSync(exports.PRIVATE_KEY_FILE, privateKey, {
-            encoding: 'utf-8',
-            flag: 'w'
-        });
         let output = '';
         const options = {
             silent: true,
+            input: Buffer.from(privateKey, 'utf-8'),
             listeners: {
                 stdout: (data) => {
                     output += data.toString();
                 }
             }
         };
-        yield exec.exec('gpg', [
-            '--batch',
-            '--import-options',
-            'import-show',
-            '--import',
-            exports.PRIVATE_KEY_FILE
-        ], options);
-        yield io.rmRF(exports.PRIVATE_KEY_FILE);
+        yield exec.exec('gpg', ['--batch', '--import-options', 'import-show', '--import'], options);
         const match = output.match(PRIVATE_KEY_FINGERPRINT_REGEX);
         return match && match[0];
     });
@@ -3404,81 +3388,6 @@ function deleteKey(keyFingerprint) {
         yield exec.exec('gpg', ['--batch', '--yes', '--delete-secret-keys', keyFingerprint], { silent: true });
         yield exec.exec('gpg', ['--batch', '--yes', '--delete-keys', keyFingerprint], { silent: true });
     });
-}
-
-
-/***/ }),
-
-/***/ 527:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || (function () {
-    var ownKeys = function(o) {
-        ownKeys = Object.getOwnPropertyNames || function (o) {
-            var ar = [];
-            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-            return ar;
-        };
-        return ownKeys(o);
-    };
-    return function (mod) {
-        if (mod && mod.__esModule) return mod;
-        var result = {};
-        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-        __setModuleDefault(result, mod);
-        return result;
-    };
-})();
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTempDir = getTempDir;
-exports.isWindows = isWindows;
-exports.isDarwin = isDarwin;
-const path = __importStar(__nccwpck_require__(928));
-function getTempDir() {
-    let tempDirectory = process.env.RUNNER_TEMP;
-    if (tempDirectory === undefined) {
-        let baseLocation;
-        if (isWindows()) {
-            // On windows use the USERPROFILE env variable
-            baseLocation = process.env['USERPROFILE']
-                ? process.env['USERPROFILE']
-                : 'C:\\';
-        }
-        else {
-            if (process.platform === 'darwin') {
-                baseLocation = '/Users';
-            }
-            else {
-                baseLocation = '/home';
-            }
-        }
-        tempDirectory = path.join(baseLocation, 'actions', 'temp');
-    }
-    return tempDirectory;
-}
-function isWindows() {
-    return process.platform === 'win32';
-}
-function isDarwin() {
-    return process.platform === 'darwin';
 }
 
 

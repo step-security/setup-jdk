@@ -46721,39 +46721,23 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.PRIVATE_KEY_FILE = void 0;
 exports.importKey = importKey;
 exports.deleteKey = deleteKey;
-const fs = __importStar(__nccwpck_require__(9896));
-const path = __importStar(__nccwpck_require__(6928));
-const io = __importStar(__nccwpck_require__(4994));
 const exec = __importStar(__nccwpck_require__(5236));
-const util = __importStar(__nccwpck_require__(4527));
-exports.PRIVATE_KEY_FILE = path.join(util.getTempDir(), 'private-key.asc');
 const PRIVATE_KEY_FINGERPRINT_REGEX = /\w{40}/;
 function importKey(privateKey) {
     return __awaiter(this, void 0, void 0, function* () {
-        fs.writeFileSync(exports.PRIVATE_KEY_FILE, privateKey, {
-            encoding: 'utf-8',
-            flag: 'w'
-        });
         let output = '';
         const options = {
             silent: true,
+            input: Buffer.from(privateKey, 'utf-8'),
             listeners: {
                 stdout: (data) => {
                     output += data.toString();
                 }
             }
         };
-        yield exec.exec('gpg', [
-            '--batch',
-            '--import-options',
-            'import-show',
-            '--import',
-            exports.PRIVATE_KEY_FILE
-        ], options);
-        yield io.rmRF(exports.PRIVATE_KEY_FILE);
+        yield exec.exec('gpg', ['--batch', '--import-options', 'import-show', '--import'], options);
         const match = output.match(PRIVATE_KEY_FINGERPRINT_REGEX);
         return match && match[0];
     });

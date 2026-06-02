@@ -244,7 +244,10 @@ function getDownloadInfo(
     if (versions.length == 0) {
       return;
     }
-    const refVersion = versions[0].slice(pkgTypeLength, versions[0].length - 1);
+    const refVersion = versions[0]!.slice(
+      pkgTypeLength,
+      versions[0]!.length - 1
+    );
 
     if (semver.satisfies(refVersion, version)) {
       versionMap.set(

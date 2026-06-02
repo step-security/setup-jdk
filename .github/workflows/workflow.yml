@@ -5,7 +5,7 @@ on:
       - '**.md'
   push:
     branches:
-      - master
+      - main
       - releases/*
     paths-ignore:
       - '**.md'
@@ -14,14 +14,14 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        operating-system: ${{ github.actor == 'dependabot[bot]' && fromJSON('["ubuntu-latest"]') || fromJSON('["ubuntu-latest", "macOS-latest", "windows-latest"]') }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-    - name: Setup Node.js 12
-      uses: actions/setup-node@v1
+      uses: actions/checkout@v6
+    - name: Setup Node.js 24
+      uses: actions/setup-node@v6
       with:
-        node-version: 12.x
+        node-version: 24.x
     - name: npm install
       run: npm install
     - name: Lint
@@ -33,9 +33,9 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
-        java-version: [8, 11, 16]
-        architecture: ['x64', 'x32']
+        operating-system: ${{ github.actor == 'dependabot[bot]' && fromJSON('["ubuntu-latest"]') || fromJSON('["ubuntu-latest", "macOS-latest", "windows-latest"]') }}
+        java-version: ${{ github.actor == 'dependabot[bot]' && fromJSON('[8]') || fromJSON('[8, 11, 16]') }}
+        architecture: ${{ github.actor == 'dependabot[bot]' && fromJSON('["x64"]') || fromJSON('["x64", "x32"]') }}
         exclude:
         - operating-system: ubuntu-latest
           architecture: 'x32'
@@ -43,7 +43,7 @@ jobs:
           architecture: 'x32'
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v6
     - name: Clear tool cache
       if: runner.os != 'windows'
       run: mv "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
@@ -76,7 +76,7 @@ jobs:
     env:
       https_proxy: http://squid-proxy:3128
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - name: Clear tool cache
       run: rm -rf $RUNNER_TOOL_CACHE/*
     - name: Setup Java 11

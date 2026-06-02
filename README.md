@@ -1,36 +1,12 @@
 [![StepSecurity Maintained Action](https://raw.githubusercontent.com/step-security/maintained-actions-assets/main/assets/maintained-action-banner.png)](https://docs.stepsecurity.io/actions/stepsecurity-maintained-actions)
 
-# 🚨 Notice
-
-The step-security/setup-jdk GitHub Action is deprecated.
-
-Please consider switching to the official [actions/setup-java](https://github.com/actions/setup-java) action v2 or later which also supports AdoptOpenJDK and its successor Eclipse Temurin:
-
-https://github.com/actions/setup-java/tree/v2.5.0#basic
-
-In order to migrate to [actions/setup-java](https://github.com/actions/setup-java) it is sufficient to replace the name of the action and set the `distribution` parameter to `temurin`.
-
-**Before:**
 
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v6
 - uses: step-security/setup-jdk@v2
   with:
     java-version: '11' # The OpenJDK version to make available on the path
-    architecture: 'x64' # defaults to 'x64'
-- run: java -cp java HelloWorldApp
-```
-
-**After:**
-
-```yaml
-steps:
-- uses: actions/checkout@v2
-- uses: actions/setup-java@v3
-  with:
-    distribution: 'temurin' # See 'Supported distributions' for available options
-    java-version: '11'
     architecture: 'x64' # defaults to 'x64'
 - run: java -cp java HelloWorldApp
 ```
@@ -55,7 +31,7 @@ See [action.yml](action.yml)
 ## Basic
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v6
 - uses: step-security/setup-jdk@v2
   with:
     java-version: '11' # The OpenJDK version to make available on the path
@@ -72,7 +48,7 @@ Examples of version specifications that the java-version parameter will accept:
 ## Local file
 ```yaml
 steps:
-- uses: actions/checkout@v2
+- uses: actions/checkout@v6
 - uses: step-security/setup-jdk@v2
   with:
     java-version: '4.0.0'
@@ -91,7 +67,7 @@ jobs:
         java: [ '8', '11', '13' ]
     name: Java ${{ matrix.java }} sample
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
       - name: Setup java
         uses: step-security/setup-jdk@v2
         with:
@@ -108,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - name: Set up JDK 1.8
       uses: step-security/setup-jdk@v2
       with:
@@ -196,7 +172,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
 
     - name: Set up JDK 1.8
       uses: step-security/setup-jdk@v2
@@ -226,7 +202,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6
     - name: Set up JDK 1.8 for Shared Runner
       uses: step-security/setup-jdk@v2
       with:
@@ -247,6 +223,3 @@ jobs:
 
 The scripts and documentation in this project are released under the [MIT License](LICENSE)
 
-# Contributions
-
-Contributions are welcome!  See [Contributor's Guide](docs/contributors.md)

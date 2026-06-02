@@ -1,0 +1,45 @@
+name: 'nightly'
+on:
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  run:
+    name: Run
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        java-version: [8, 11, 16]
+        architecture: ['x64', 'x32']
+        exclude:
+        - operating-system: ubuntu-latest
+          architecture: 'x32'
+        - operating-system: macOS-latest
+          architecture: 'x32'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Set Node.js 12.x
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: npm install
+      run: npm install
+    - name: Clear tool cache
+      if: runner.os != 'windows'
+      run: mv "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
+    - name: Clear tool cache (Windows)
+      if: runner.os == 'windows'
+      run: move "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
+    - name: Setup Java ${{ matrix.java-version}}
+      id: setup-java
+      uses: ./
+      with:
+        java-version: ${{ matrix.java-version }}
+        architecture: ${{ matrix.architecture }}
+    - name: Verify Java ${{ matrix.java-version}}
+      if: runner.os != 'windows'
+      run: __tests__/verify-java.sh "${{ matrix.java-version }}" "${{ steps.setup-java.outputs.path }}" "${{ steps.setup-java.outputs.version }}"
+    - name: Verify Java ${{ matrix.java-version}} (Windows)
+      if: runner.os == 'windows'
+      run: __tests__/verify-java.ps1 "${{ matrix.java-version }}" "${{ steps.setup-java.outputs.path }}" "${{ steps.setup-java.outputs.version }}"

@@ -1,0 +1,88 @@
+name: Main workflow
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    branches:
+      - master
+      - releases/*
+    paths-ignore:
+      - '**.md'
+jobs:
+  build:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Setup Node.js 12
+      uses: actions/setup-node@v1
+      with:
+        node-version: 12.x
+    - name: npm install
+      run: npm install
+    - name: Lint
+      run: npm run format-check
+    - name: npm test
+      run: npm test
+
+  test:
+    runs-on: ${{ matrix.operating-system }}
+    strategy:
+      matrix:
+        operating-system: [ubuntu-latest, macOS-latest, windows-latest]
+        java-version: [8, 11, 16]
+        architecture: ['x64', 'x32']
+        exclude:
+        - operating-system: ubuntu-latest
+          architecture: 'x32'
+        - operating-system: macOS-latest
+          architecture: 'x32'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Clear tool cache
+      if: runner.os != 'windows'
+      run: mv "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
+    - name: Clear tool cache (Windows)
+      if: runner.os == 'windows'
+      run: move "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
+    - name: Setup Java ${{ matrix.java-version}}
+      id: setup-java
+      uses: ./
+      with:
+        java-version: ${{ matrix.java-version }}
+        architecture: ${{ matrix.architecture }}
+    - name: Verify Java ${{ matrix.java-version}}
+      if: runner.os != 'windows'
+      run: __tests__/verify-java.sh "${{ matrix.java-version }}" "${{ steps.setup-java.outputs.path }}" "${{ steps.setup-java.outputs.version }}"
+    - name: Verify Java ${{ matrix.java-version}} (Windows)
+      if: runner.os == 'windows'
+      run: __tests__/verify-java.ps1 "${{ matrix.java-version }}" "${{ steps.setup-java.outputs.path }}" "${{ steps.setup-java.outputs.version }}"
+
+  test-proxy:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:latest
+      options: --dns 127.0.0.1
+    services:
+      squid-proxy:
+        image: datadog/squid:latest
+        ports:
+          - 3128:3128
+    env:
+      https_proxy: http://squid-proxy:3128
+    steps:
+    - uses: actions/checkout@v2
+    - name: Clear tool cache
+      run: rm -rf $RUNNER_TOOL_CACHE/*
+    - name: Setup Java 11
+      id: setup-java
+      uses: ./
+      with:
+        java-version: 11
+    - name: Verify Java 11
+      run: __tests__/verify-java.sh 11 "${{ steps.setup-java.outputs.path }}" "${{ steps.setup-java.outputs.version }}"

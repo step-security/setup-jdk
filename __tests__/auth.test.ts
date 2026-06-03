@@ -6,6 +6,7 @@ import path = require('path');
 // make the os.homedir() call be local to the tests
 jest.doMock('os', () => {
   return {
+    ...jest.requireActual('os'),
     homedir: jest.fn(() => __dirname)
   };
 });

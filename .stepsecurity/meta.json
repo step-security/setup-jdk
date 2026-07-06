@@ -1,0 +1,18 @@
+{
+   "schema_version": "1",
+   "onboarding_type": "copied",
+   "archived": true,
+   "maintained_action_name": "step-security/setup-jdk",
+   "upstream_full_repo_name": "joschi/setup-jdk",
+   "action_type": "node",
+   "last_release": {
+     "tag_name": "v2.5.1",
+     "created_at": "2026-06-03T11:41:29Z",
+     "published_at": "2026-06-03T20:50:48Z"
+   },
+   "sync": {
+     "ignore_presets": [
+       "defaults_v1"
+     ]
+   }
+ }
